@@ -64,6 +64,9 @@ export NODE_PATH=/usr/local/lib/node_modules
 ### Added by the Heroku Toolbelt
 export PATH="/usr/local/heroku/bin:$PATH"
 
+### Added by the Heroku Toolbelt
+export PATH="~/.cabal/bin:$PATH"
+
 ### small notify alias for long time work
 alias notify="notify-send \"Done\" -u critical -t 5 || notify-send \"Error\" -u critical -t 5 "
 
@@ -78,3 +81,48 @@ source ~/.zsh/antigen/antigen.zsh
 # OPAM configuration
 . /home/max/.opam/opam-init/init.zsh > /dev/null 2> /dev/null || true
 eval `opam config -env`
+
+# bower stuff
+alias bower='noglob bower'
+###-begin-bem-completion-###
+#
+# bem command completion script
+#
+# Installation: bem completion >> ~/.bashrc  (or ~/.zshrc)
+# Or, maybe: bem completion > /usr/local/etc/bash_completion.d/bem
+#
+
+COMP_WORDBREAKS=${COMP_WORDBREAKS/=/}
+COMP_WORDBREAKS=${COMP_WORDBREAKS/@/}
+export COMP_WORDBREAKS
+
+if complete &>/dev/null; then
+  _bem_completion () {
+    local si="$IFS"
+    IFS=$'\n' COMPREPLY=($(COMP_CWORD="$COMP_CWORD" \
+                           COMP_LINE="$COMP_LINE" \
+                           COMP_POINT="$COMP_POINT" \
+                           bem completion -- "${COMP_WORDS[@]}" \
+                           2>/dev/null)) || return $?
+    IFS="$si"
+  }
+  complete -F _bem_completion bem
+elif compctl &>/dev/null; then
+  _bem_completion () {
+    local cword line point words si
+    read -Ac words
+    read -cn cword
+    let cword-=1
+    read -l line
+    read -ln point
+    si="$IFS"
+    IFS=$'\n' reply=($(COMP_CWORD="$cword" \
+                       COMP_LINE="$line" \
+                       COMP_POINT="$point" \
+                       bem completion -- "${words[@]}" \
+                       2>/dev/null)) || return $?
+    IFS="$si"
+  }
+  compctl -K _bem_completion bem
+fi
+###-end-bem-completion-###
